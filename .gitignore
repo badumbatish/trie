@@ -1,0 +1,5 @@
+trie/Debug/
+**/main.cpp
+**/*.mk
+trie/trie.txt
+trie/trie.project
