@@ -1,31 +1,27 @@
 #include "trie.h"
-#include <iostream>
-#include <unordered_map>
 
-#include <string>
-#include <vector>
-#include <fstream>
-void trie::input(std::string filename)
-{
-	std::ifstream f;
-	f.open(filename);
-	std::string str;
-    while (f >> str) this->insert(str);
-    f.close();
+
+void trie::insert(const std::string& str) {
+	trie::insert(str,0,str.length());
 }
-
-void trie::insert(std::string str)  {
-	size_t i=0;
+void trie::insert(const std::string& str, size_t start, size_t end)  {
+	assert(end-start<=str.length() && "Length of string is smaller than end-start, will possibly be undefined behavior");
+	size_t i=start;
 	trieNode *link=&root;
 	
-	for(;i<str.length();i++) {
+	for(;i<end;i++) {
 		if(link->mp[str[i]]==nullptr) link->mp[str[i]]=new trieNode;
 		link=link->mp[str[i]];
 	}
 	link->isEnd=true;
 }
 
-bool trie::search(std::string str) {
+void trie::insert(const std::vector<std::string> &patterns) {
+	for(auto pattern : patterns) trie::insert(pattern);
+}
+
+
+bool trie::search(const std::string& str) {
 	size_t i=0;
 	trieNode *link=&root;
 	for(i=0;i<str.length();i++) {
@@ -35,67 +31,31 @@ bool trie::search(std::string str) {
 	return link->isEnd;
 }
 
-void trie::suggestion() {
-	std::cout << "Entering suggestion mode" << std::endl;
-	std::string str;
-	std::cin >> str;
-	while(str!="0")
-	{
-		this->suggest(str);
-		std::cin >> str;
+void trie::dfs(trieNode* node, std::string& str) {
+	trieNode* link = node;
+	for(auto it : link->mp){
+		//std::cout << it->first << std::endl;
+		str.push_back(it.first);
+		if(it.second->isEnd) {
+			std::cout << str << " ";
+		}
+		trie::dfs(it.second,str);
+		str.pop_back();
 	}
+	return;
 }
 
-void trie::suggest(std::string& str) {
-	size_t maximum_words=3;
-	size_t max_length=5;
-	
-	size_t i=0; 
-	std::string word;
-	trieNode* link=&root;
-	for(;i<str.length();i++)
-	{	
-		if(link->mp[str[i]]==nullptr) {
-			std::cout << "Cant find any words" << std::endl;
-			return;
-		}
-		link=link->mp[str[i]];
+void trie::bfs(trieNode* node) {
+	trieNode* link=node;
+	std::queue<std::pair<char,trieNode*>> q;
+	for(auto i : link->mp) {
+		q.push(i);
 	}
-	
-	std::vector<std::string> vec;
-	int count=5;
-	find(link,str,vec,count);
-	
-	
-	for(auto i : vec) {
-		std::cout << "--> " <<  i << std::endl;
+	while(!q.empty()){
+		std::cout << q.front().first << std::endl;
+		bfs(q.front().second);
+		q.pop();
 	}
-	std::cout << std::endl;
-}
 
-std::string trie::find(trieNode* link,std::string str,std::vector<std::string>& vec, int& count)
-{	
-	if(count<=0)
-	{
-		return "";
-	}
-	std::string word;
-	if(link->isEnd==true)
-	{
-		vec.push_back(str);
-		count--;
-	}
-	for(auto i : link->mp)
-	{
-		if(i.second!=nullptr) {
-			std::string s(1,i.first);
-			word=find(i.second,str+s,vec,count);
-			if(word!="")
-			{
-				count--;
-				vec.push_back(word);
-			}
-		}
-	}
-	return "";
+	return;
 }

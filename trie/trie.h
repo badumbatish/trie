@@ -1,9 +1,5 @@
 #pragma once
-#include <map>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
+#include "includer.h"
 
 struct trieNode {
 	bool isEnd=false;
@@ -12,12 +8,24 @@ struct trieNode {
 
 class trie {
 private:
-	trieNode root;
+
 public:
-	void input(std::string);
-	void insert(std::string);
-	bool search(std::string);
-	void suggestion();
-	void suggest(std::string&);
-	std::string find(trieNode*, std::string, std::vector<std::string>&, int&);
+	trieNode root;
+	bool search(const std::string&);
+	void insert(const std::string&, size_t start, size_t end); // end = str.length()
+	void insert(const std::string&);
+	void insert(const std::vector<std::string>&);
+
+	void dfs() {
+		std::string str="";
+		dfs(&root,str);
+	}
+	void dfs(trieNode* node, std::string& str);
+
+	void bfs() {
+		bfs(&root);
+	}
+	void bfs(trieNode* node);
+
+	
 };
